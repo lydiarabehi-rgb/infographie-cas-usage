@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Infographie – Cas d’usage RH (Chatbot pré-qualification)</title>
+<style>
+  :root{
+    --bg:#0f1223;           /* fond header (peut être ton bleu nuit) */
+    --ink:#0e1726;          /* texte sombre */
+    --muted:#6b7280;        /* texte secondaire */
+    --line:#e5e7eb;         /* traits */
+    --brand:#6c5ce7;        /* accent OBEA/AURECIS à adapter */
+    --ok:#16a34a;           /* vert bénéfice */
+    --risk:#dc2626;         /* rouge complexité */
+    --amber:#f59e0b;        /* amber pour “stratégique” */
+    --chip:#eef2ff;         /* pastille métier */
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,'Noto Sans',sans-serif;color:var(--ink);background:#fafafa}
+  .wrap{max-width:1080px;margin:auto;padding:24px}
+  .hero{
+    background:linear-gradient(135deg,var(--bg),#1b2150 60%,#1f2a69);
+    color:#fff;border-radius:16px;padding:24px 24px 18px;position:relative;overflow:hidden;
+  }
+  .hero h1{margin:0 0 8px;font-weight:800;letter-spacing:.1px}
+  .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .tag{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;padding:6px 10px;border-radius:999px;font-size:13px}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+  .kpi{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:14px}
+  .kpi .val{font-size:28px;font-weight:800}
+  .kpi.b{--tone:var(--ok)} .kpi.c{--tone:var(--risk)} .kpi.r{--tone:var(--amber)}
+  .kpi .val{color:var(--tone)}
+  .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;margin-top:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .card h3{margin:0 0 12px;font-size:18px}
+  p{margin:0 0 10px}
+  .muted{color:var(--muted)}
+  /* Critères */
+  .crit{display:grid;grid-template-columns:1.6fr .6fr .6fr 3fr;gap:8px;align-items:center;padding:10px;border:1px dashed #e6e6ef;border-radius:10px;margin-bottom:8px;background:#fbfbff}
+  .crit .w,.crit .s{font-variant-numeric:tabular-nums;text-align:center;font-weight:700}
+  .crit .w{color:#4f46e5} .crit .s{color:#111827}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;background:var(--chip);color:#3730a3;border:1px solid #e0e7ff}
+  .crit.ok{background:#f0fff7;border-color:#d1fae5}
+  .crit.risk{background:#fff7f7;border-color:#ffe4e6}
+  .crit .why{color:#374151;font-size:13px}
+  /* Matrice */
+  .matrix{position:relative;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}
+  .quadrants{position:relative;border:1px dashed #c7cbd6;border-radius:8px;height:360px;background:
+      linear-gradient(to right, transparent 50%, rgba(127,127,127,.12) 50%),
+      linear-gradient(to top,     transparent 50%, rgba(127,127,127,.12) 50%);
+      background-size: 2px 100%, 100% 2px; background-repeat:no-repeat;
+      background-position: 50% 0, 0 50%;
+  }
+  .q-label{position:absolute;font-weight:800;font-size:16px;opacity:.9}
+  .q1{top:10px;left:16px;color:#ef4444}      /* Piège */
+  .q2{top:10px;right:16px;color:#d97706}     /* Stratégique */
+  .q3{bottom:10px;left:16px;color:#6b7280}   /* Sans intérêt */
+  .q4{bottom:10px;right:16px;color:#059669}  /* Quick Wins */
+  .dot{
+    --x:74;   /* BENEFICE en % = 7.4 * 10 */
+    --y:53;   /* COMPLEXITE en % = 5.3 * 10 */
+    position:absolute; width:16px;height:16px;border-radius:50%;
+    background:var(--amber); box-shadow:0 0 0 5px rgba(245,158,11,.18);
+    left:calc(var(--x) * 1%); bottom:calc(var(--y) * 1%);
+    transform:translate(-50%,50%);
+  }
+  .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .legend span{display:inline-flex;align-items:center;gap:6px;background:#f6f7fb;border:1px solid #e6e8f2;border-radius:999px;padding:6px 10px;font-size:13px}
+  .chip{background:#eef2ff;border:1px solid #e1e7ff;color:#3730a3;border-radius:999px;padding:3px 10px;margin-right:6px}
+  /* Footer */
+  .note{font-size:13px;color:var(--muted);margin-top:10px}
+  /* Responsive */
+  @media (max-width:920px){ .grid{grid-template-columns:1fr} .kpis{grid-template-columns:1fr 1fr 1fr} }
+  @media (max-width:640px){ .kpis{grid-template-columns:1fr} .crit{grid-template-columns:1.4fr .6fr .6fr 1fr} }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- HEADER – tu peux remplacer le fond par une image : background-image:url('images/header.jpg') -->
+    <section class="hero">
+      <h1>Chatbot de pré-qualification candidat</h1>
+      <p class="muted" style="margin:2px 0 10px">🎯 Automatiser la réponse aux questions fréquentes et accélérer la pré-qualification tout en améliorant l’expérience candidat. IA générative connectée aux offres et critères de poste.</p>
+      <div class="tags">
+        <span class="tag">👤 Sponsor : Responsable Recrutement / TA</span>
+        <span class="tag">📌 Statut : Brouillon / Expérimentation</span>
+        <span class="tag">🏷️ Métiers impactés : Recrutement • Marque Employeur • SIRH</span>
+      </div>
+      <div class="kpis">
+        <div class="kpi b"><div class="val">7.4</div><div>Bénéfice (pondéré)</div></div>
+        <div class="kpi c"><div class="val">5.3</div><div>Complexité (pondérée)</div></div>
+        <div class="kpi r"><div class="val">1.4</div><div>Ratio B/C</div></div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <!-- AXE BENEFICES -->
+      <section class="card">
+        <h3>⚙️ Axe 1 — Bénéfices (valeur créée)</h3>
+        <!-- Remplace les images par tes pictos si besoin -->
+        <div class="crit ok">
+          <div><span class="pill">Performance RH</span></div>
+          <div class="w">9</div><div class="s">8</div>
+          <div class="why">Traitement candidat accéléré, réponses 24/7, moins de tâches répétitives.</div>
+        </div>
+        <div class="crit ok">
+          <div><span class="pill">Valeur pour collaborateurs/managers</span></div>
+          <div class="w">8</div><div class="s">8</div>
+          <div class="why">Expérience candidat fluide, info claire, moins d’attente.</div>
+        </div>
+        <div class="crit ok">
+          <div><span class="pill">Contribution stratégique RH</span></div>
+          <div class="w">9</div><div class="s">7</div>
+          <div class="why">Aligne recrutement &amp; objectif time-to-hire, marque employeur.</div>
+        </div>
+        <div class="crit">
+          <div><span class="pill">Création de connaissance / pilotage</span></div>
+          <div class="w">6</div><div class="s">6</div>
+          <div class="why">Log d’interactions utile (FAQ, points de friction), à connecter au cockpit.</div>
+        </div>
+        <div class="crit">
+          <div><span class="pill">Impact social &amp; culturel positif</span></div>
+          <div class="w">7</div><div class="s">5</div>
+          <div class="why">Meilleure transparence des process ; attention aux biais et au non-discriminatoire.</div>
+        </div>
+        <p class="note">Moyenne pondérée bénéfice = <b>7.4</b></p>
+      </section>
+
+      <!-- AXE COMPLEXITE -->
+      <section class="card">
+        <h3>🧩 Axe 2 — Complexité (faisabilité réelle)</h3>
+        <div class="crit risk">
+          <div><span class="pill">Complexité technique &amp; data</span></div>
+          <div class="w">7</div><div class="s">5</div>
+          <div class="why">Connexion ATS, qualité des fiches de poste, gestion des versions d’offres.</div>
+        </div>
+        <div class="crit risk">
+          <div><span class="pill">Complexité organisationnelle</span></div>
+          <div class="w">8</div><div class="s">6</div>
+          <div class="why">TA, managers, marque employeur : coordination et règles de réponse.</div>
+        </div>
+        <div class="crit">
+          <div><span class="pill">Maturité &amp; acculturation</span></div>
+          <div class="w">9</div><div class="s">5</div>
+          <div class="why">Acculturation des recruteurs à la supervision du bot et à la calibration.</div>
+        </div>
+        <div class="crit">
+          <div><span class="pill">Éthique &amp; conformité</span></div>
+          <div class="w">6</div><div class="s">4</div>
+          <div class="why">RGPD, consentement, traçabilité des réponses, non-discrimination.</div>
+        </div>
+        <div class="crit">
+          <div><span class="pill">Ressources mobilisées</span></div>
+          <div class="w">5</div><div class="s">5</div>
+          <div class="why">Budget modéré ; besoin PO/TA pour pilotage et amélioration continue.</div>
+        </div>
+        <div class="crit risk">
+          <div><span class="pill">Complexité du dialogue social</span></div>
+          <div class="w">9</div><div class="s">3</div>
+          <div class="why">Sujet peu sensible si le bot ne sélectionne pas ; informer les IRP reste requis.</div>
+        </div>
+        <p class="note">Moyenne pondérée complexité = <b>5.3</b></p>
+      </section>
+    </div>
+
+    <!-- MATRICE -->
+    <section class="card matrix" style="margin-top:16px">
+      <h3>📈 Lecture matrice Bénéfice × Complexité</h3>
+      <!-- Si tu veux afficher ton image de matrice en fond : 
+           .quadrants{ background-image:url('images/matrice.png'); background-size:cover } -->
+      <div class="quadrants">
+        <span class="q-label q1">Piège</span>
+        <span class="q-label q2">Stratégique</span>
+        <span class="q-label q3">Sans intérêt</span>
+        <span class="q-label q4">Quick Wins</span>
+        <!-- Le point est positionné via --x et --y (10 = 1 unité) -->
+        <div class="dot" title="Bénéfice 7.4 / Complexité 5.3"></div>
+      </div>
+      <div class="legend">
+        <span><b>Bénéfice</b> → 7.4</span>
+        <span><b>Complexité</b> → 5.3</span>
+        <span><b>Quadrant</b> : <b style="color:var(--amber)">Stratégique</b> (haut bénéfice, complexité médiane)</span>
+      </div>
+      <p class="note">Décision suggérée : lancer sur un périmètre pilote + supervision forte (qualité de réponse, biais), puis intégrer ATS et cockpit RH.</p>
+    </section>
+
+    <!-- ASSETS – Remplace par tes visuels -->
+    <section class="note">
+      <p>🔧 Astuces d’intégration :</p>
+      <ul>
+        <li>Remplace les images par tes fichiers (ex. <code>images/cas-usage.png</code>, <code>images/matrice.png</code>).</li>
+        <li>Pour un autre cas, change simplement les valeurs : bénéfice (<code>--x</code>) et complexité (<code>--y</code>) = note×10.</li>
+      </ul>
+    </section>
+  </div>
+</body>
+</html>
