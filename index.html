@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cas d’usage — Chatbot de pré-qualification candidat</title>
+  <style>
+    :root{
+      /* Change juste cette couleur si besoin */
+      --obea-blue:#0F4C81;
+      --ink:#0e1320;
+      --muted:#6b7280;
+      --bg:#f7f8fa;
+      --ok:#16a34a;
+      --warn:#f59e0b;
+      --bad:#dc2626;
+      --chip:#e9eef7;
+      --card:#ffffff;
+      --grid:#c7ced9;
+      --dash:#9aa3b2;
+      --soft:12px;
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+    .wrap{max-width:1100px;margin:40px auto;padding:0 20px}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:0 6px 20px rgba(14,19,32,.06);overflow:hidden}
+    .head{background:var(--obea-blue);color:#fff;padding:22px 24px}
+    .title{margin:0;font-weight:700;font-size:26px}
+    .meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-weight:500}
+    .chip{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.18);padding:6px 10px;border-radius:999px}
+    .chip--status{background:#eaf3ff;color:#114e96;border:1px solid #cde0ff}
+    .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:24px;padding:24px}
+    .h6{margin:0 0 10px;font-size:13px;letter-spacing:.02em;color:var(--muted);text-transform:uppercase}
+    .p{margin:6px 0 0}
+    .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .tag{background:#eef2ff;color:#1e3a8a;border:1px solid #dce4ff;padding:4px 8px;border-radius:999px;font-weight:600;font-size:12px}
+    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px}
+    .kpi{background:#f9fafb;border:1px solid #eef2f6;border-radius:12px;padding:14px 12px;text-align:center}
+    .kpi .v{font-size:28px;font-weight:800;margin:2px 0}
+    .kpi .v.ok{color:var(--ok)} .kpi .v.mid{color:#f59e0b} .kpi .v.bad{color:var(--bad)}
+    .kpi .l{font-size:13px;color:var(--muted)}
+
+    /* Matrice carrée */
+    .matrix-card{padding:24px}
+    .matrix-wrap{position:relative;background:#fff;border:1px solid #e5e9f0;border-radius:12px;padding:18px}
+    .matrix{position:relative;aspect-ratio:1/1;background:#fff;border:1px solid #d9e0ea;border-radius:10px;overflow:hidden}
+    /* Quadrants */
+    .q{position:absolute;inset:auto;opacity:.18}
+    .q1{left:50%;bottom:0;right:0;top:50%;background:#22c55e}           /* Quick wins */
+    .q2{left:50%;top:0;right:0;bottom:50%;background:#f59e0b}           /* Transformateur */
+    .q3{left:0;top:0;right:50%;bottom:50%;background:#ef4444}           /* Facile mais impact faible */
+    .q4{left:0;bottom:0;right:50%;top:50%;background:#64748b}           /* À arbitrer */
+    /* Grille & axes */
+    .axis{position:absolute;inset:0}
+    .axis:before,.axis:after{
+      content:"";position:absolute;background:var(--dash)
+    }
+    /* mi-lignes en 5/10 */
+    .axis:before{left:50%;top:0;bottom:0;width:2px;border-left:2px dashed var(--dash)}
+    .axis:after{top:50%;left:0;right:0;height:2px;border-top:2px dashed var(--dash)}
+    /* cadre */
+    .border{position:absolute;inset:0;border:2px solid #cfd6e2;border-radius:8px;pointer-events:none}
+
+    /* Labels quadrants */
+    .qlabel{position:absolute;font-weight:800;font-size:14px;color:#334155;text-shadow:0 1px 0 #fff}
+    .qlabel small{display:block;font-weight:600;color:#475569;margin-top:2px}
+    .ql1{left:56%;bottom:6%;}   /* Quick wins */
+    .ql2{left:56%;top:6%;}
+    .ql3{left:6%;top:6%;}
+    .ql4{left:6%;bottom:6%;}
+
+    /* Point */
+    .dot{--x:74; --y:53; position:absolute;left:calc(var(--x)*1%);bottom:calc(var(--y)*1%);width:14px;height:14px;background:#f59e0b;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,.18);transform:translate(-50%,50%)}
+    /* Axes labels sans pictos */
+    .xlab,.ylab{font-weight:700;color:#334155}
+    .xlab{display:flex;justify-content:center;margin-top:10px}
+    .ylab{position:absolute;left:-8px;top:50%;transform:translate(-100%,-50%) rotate(-90deg);transform-origin:left center}
+
+    /* Table critères (valeur finale uniquement) */
+    .crit{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+    .crit .tbl{border:1px solid #e6ecf3;border-radius:12px;overflow:hidden;background:#fff}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px 12px;border-bottom:1px solid #eef2f6;font-size:14px;vertical-align:top}
+    th{background:#f6f8fb;color:#334155;text-align:left}
+    td strong{font-weight:800}
+    .note{font-weight:800}
+    .note.ok{color:var(--ok)} .note.mid{color:var(--warn)} .note.bad{color:var(--bad)}
+    .just{color:var(--muted);font-size:13px;margin-top:4px}
+    .foot{padding:18px 24px;border-top:1px solid #eef2f6;background:#fafbfc;color:#556078}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="head">
+        <h1 class="title">Chatbot de pré-qualification candidat</h1>
+        <div class="meta">
+          <span class="chip">👤 Sponsor&nbsp;: Responsable Recrutement / Talent Acquisition</span>
+          <span class="chip chip--status">•&nbsp;Statut&nbsp;: <strong>Expérimentation</strong></span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <section>
+          <h3 class="h6">Objectif & principe</h3>
+          <p class="p">
+            <strong>Objectif métier&nbsp;:</strong> automatiser la réponse aux questions fréquentes et accélérer la
+            pré-qualification, tout en améliorant l’expérience candidat.<br/>
+            <strong>Principe IA/Data&nbsp;:</strong> chatbot conversationnel (IA générative) connecté aux offres et critères de poste.
+          </p>
+          <h3 class="h6" style="margin-top:14px">Bénéfices & vigilance</h3>
+          <p class="p">
+            <strong>Bénéfices attendus&nbsp;:</strong> gain de temps recruteurs, réduction des délais de traitement, expérience plus fluide.
+            <br/><strong>Points de vigilance&nbsp;:</strong> qualité / transparence des réponses, biais potentiels, calibrage des critères.
+          </p>
+          <div class="tags">
+            <span class="tag">Recrutement</span>
+            <span class="tag">Marque Employeur</span>
+            <span class="tag">SIRH</span>
+          </div>
+          <div class="kpis">
+            <div class="kpi">
+              <div class="v ok">7.4</div>
+              <div class="l">Bénéfice (pondéré)</div>
+            </div>
+            <div class="kpi">
+              <div class="v mid">5.3</div>
+              <div class="l">Complexité (pondérée)</div>
+            </div>
+            <div class="kpi">
+              <div class="v">1.4</div>
+              <div class="l">Ratio B/C</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="matrix-card">
+          <div class="matrix-wrap">
+            <div class="matrix" id="mat">
+              <!-- Quadrants colorés -->
+              <div class="q q1"></div>
+              <div class="q q2"></div>
+              <div class="q q3"></div>
+              <div class="q q4"></div>
+
+              <!-- labels quadrants -->
+              <div class="qlabel ql1">Quick Wins<small>fort bénéfice / faible complexité</small></div>
+              <div class="qlabel ql2">Transformateur<small>fort bénéfice / forte complexité</small></div>
+              <div class="qlabel ql3">Facile mais impact faible<small>faible bénéfice / faible complexité</small></div>
+              <div class="qlabel ql4">À arbitrer<small>faible bénéfice / forte complexité</small></div>
+
+              <!-- axes & cadre -->
+              <div class="axis"></div>
+              <div class="border"></div>
+
+              <!-- point (x=benefice, y=complexite) -->
+              <div class="dot" style="--x:74; --y:53"></div>
+              <div class="ylab">Complexité ↑</div>
+            </div>
+            <div class="xlab">Bénéfice →</div>
+          </div>
+        </section>
+      </div>
+
+      <div class="grid" style="padding-top:0">
+        <section class="crit">
+          <!-- Bénéfices -->
+          <div class="tbl">
+            <table>
+              <thead><tr><th colspan="2">Axe 1 — Critères de bénéfices (notes choisies du cas)</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><strong>Impact sur la performance RH</strong><div class="just">Efficacité/automatisation sur questions récurrentes & pré-qualif.</div></td>
+                  <td class="note ok">9 / 10</td>
+                </tr>
+                <tr>
+                  <td><strong>Valeur pour collaborateurs & managers</strong><div class="just">Expérience candidat plus fluide, réponses 24/7.</div></td>
+                  <td class="note ok">8 / 10</td>
+                </tr>
+                <tr>
+                  <td><strong>Contribution à la stratégie RH</strong><div class="just">Accélération du time-to-hire, image d’innovation.</div></td>
+                  <td class="note ok">7 / 10</td>
+                </tr>
+                <tr>
+                  <td><strong>Création de connaissance / pilotage data</strong><div class="just">Intentions & FAQ → insights pour améliorer l’offre et le process.</div></td>
+                  <td class="note mid">6 / 10</td>
+                </tr>
+                <tr>
+                  <td><strong>Impact social & culturel positif</strong><div class="just">Transparence process, équité si bien gouverné.</div></td>
+                  <td class="note mid">7 / 10</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Complexité -->
+          <div class="tbl">
+            <table>
+              <thead><tr><th colspan="2">Axe 2 — Critères de complexité (notes choisies du cas)</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><strong>Complexité technique & data</strong><div class="just">Connexion ATS, qualité données offres/critères.</div></td>
+                  <td class="note mid">5 / 10</td>
+                </tr>
+                <tr>
+                  <td><strong>Complexité organisationnelle</strong><div class="just">TA + métiers + DSI, gouvernance FAQ, MEP rapide possible.</div></td>
+                  <td class="note mid">6 / 10</td>
+                </tr>
+                <tr>
+                  <td><strong>Maturité & acculturation des équipes</strong><div class="just">Adoption TA et calibrage des réponses.</div></td>
+                  <td class="note mid">6 / 10</td>
+                </tr>
+                <tr>
+                  <td><strong>Enjeux éthiques / réglementaires</strong><div class="just">Transparence, biais, RGPD → cadrables.</div></td>
+                  <td class="note mid">5 / 10</td>
+                </tr>
+                <tr>
+                  <td><strong>Ressources mobilisées</strong><div class="just">Budget modéré, temps d’intégration & tuning.</div></td>
+                  <td class="note low">4 / 10</td>
+                </tr>
+                <tr>
+                  <td><strong>Complexité du dialogue social</strong><div class="just">Information/consultation possible selon périmètre d’automatisation.</div></td>
+                  <td class="note mid">6 / 10</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <div class="foot">
+        🚀 Prochaines étapes : mesurer la satisfaction candidat, calibrer les réponses, connecter pleinement l’ATS.
+      </div>
+    </div>
+  </div>
+</body>
+</html>
